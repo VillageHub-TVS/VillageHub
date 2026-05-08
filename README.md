@@ -1,97 +1,170 @@
-# VillageHub
-### 1. Project Overview
-Project Title
-Village Hub: A centralized app for all residents to manage all community amenities and communication.
-Difficulty Level
-Beginner-Intermediate
-Simple app dev
-Topics Covered
-Frontend
-Backend
-APIs
-Database
-UI/UX
+<div align="center">
+  <img src="images/TVS_logo.png" alt="Tiny Village Spirit Logo" width="120" />
 
-### 2. Project Description
-This app allows residents of tiny village spirit’s tiny home communities to efficiently book shared amenities and share information. Users and Admin can communicate with one another via users sending feedback/requests about current services and Admin posting community announcements. Further, users can update other users on essential information through community posts.
-This app is meant to be designed to exist within the lifestyle space as it is meant to be a service that makes the lives of residents more efficient.
+  # 🏘️ VillageHub
 
-### 3. Problem & Motivation
-Problem Statement
-Community spaces could get disorganized because residents may try using spaces at the same time, and emails with announcements and feedback may go unchecked or checked late.
+  **A centralized mobile app for residents to manage community amenities, bookings, and communication.**
 
-### 4. Project Goals & Scope
-Goals
-Functional demo
-Usable UI
-Client presentation
-Learning outcomes
-Non-Goals
-Perfect features
+  ![React Native](https://img.shields.io/badge/React_Native-Expo-61DAFB?style=flat-square&logo=react)
+  ![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?style=flat-square&logo=firebase)
+  ![Status](https://img.shields.io/badge/Status-Deploying-1a7a6e?style=flat-square)
+  ![Platform](https://img.shields.io/badge/Platform-iOS_(App_Store)-000000?style=flat-square&logo=apple)
 
-### 5. Tech Stack
-List of Tools
-Give a list of frameworks/libraries used by each subteam
-Example
-Frontend: React, TailwindCSS, Next.js
-Backend: Flask, Firebase
+</div>
 
-### 6. Features & Deliverables
-Core Features
-Feature Name: Homepage/Dashboard
-What it does:
-Includes a navigation bar
-Why it exists:
-So users can access all features of the app
-Owner:
-Backend
-Feature Name: User Authentication
-What it does:
-Allows users to log into their individual accounts
-Owner:
-Backend + Frontend (easy to use log in)
-Feature Name: User feedback/requests portal
-What it does:
-Allows the user to send Admin positive and negative feedback about current services and also allows them to send requests for maintenance or extra service.
-Why it exists:
-Allows Admin to efficiently keep track of tasks and ideas that could help improve the village and the residents' quality of stay.
-Owner:
-Backend
-Feature Name: Room Booking
-What it does:
-Users can view available time slots and book slots
-Why it exists:
-Prevents room conflicts
-Owner:
-Frontend (to display time slots)
-Backend (to keep track of bookings)
-Stretch / Nice-to-Have Features (Optional)
-Community posts social-media aspect
-Dark mode/Light mode
-Chatbot
+---
 
-### 7. Timeline & Milestones
-High-Level Timeline
-Break the semester into phases:
-Onboarding & setup - Week 1
-Training/Instruction Week 2-3
-Core development - Week 3-8
-Testing & polish - Week 8-10
-Demo & presentations - Week 10-12
-Key Milestones
-Onboarding & setup by Week 1
-Design ready & Training/Instruction by Week 2
-Core functionality working by Week 8
-Testing & polish by Week 10
-Demo-ready by Week 12
-Dates might vary based on client needs.
+## 📖 Overview
 
-### 8. Team Structure & Expectations
-Team Size
-8-10
+VillageHub is a mobile app built for residents of **Tiny Village Spirit's** tiny home communities. It streamlines how residents book shared amenities, receive announcements, submit feedback, and stay connected with their community — all in one place.
 
-### 9. Risks & Challenges
-New technologies
-Team experience gaps
+> Designed to live in the **lifestyle space**, VillageHub makes daily community life more efficient and enjoyable for both residents and administrators.
 
+---
 
+## 🚩 The Problem
+
+Community spaces get chaotic without a centralized system:
+
+- 🏠 **Booking conflicts** — residents accidentally try to use spaces at the same time
+- 📬 **Missed communication** — announcement emails go unread or arrive late
+- 📋 **Lost feedback** — maintenance requests and suggestions fall through the cracks
+
+VillageHub solves all three.
+
+---
+
+## ✨ Features
+
+| Feature | Description | Status |
+|---|---|---|
+| 🔐 **User Authentication** | Secure login & registration with role-based access (Resident / Admin) | ✅ Core |
+| 🏠 **Room Booking** | Browse available time slots and reserve shared spaces | ✅ Core |
+| 📢 **Announcements** | Admins post community-wide updates; residents receive them instantly | ✅ Core |
+| 💬 **Feedback & Requests** | Residents submit maintenance requests and feedback; Admins manage and respond | ✅ Core |
+| 📅 **Community Calendar** | Shared calendar for events, bookings, and gardening sessions | ✅ Core |
+| 🌱 **Gardening Slots** | Book plot time in the community garden | ✅ Core |
+| 🧹 **Chore Management** | Rotating chore assignments tracked per resident | ✅ Core |
+| 🤖 **AI Chatbot** | Resident assistant for quick questions | 🔮 Stretch |
+| 🌙 **Dark / Light Mode** | Theme toggle for accessibility | 🔮 Stretch |
+| 📱 **Community Posts** | Social-media-style community board | 🔮 Stretch |
+| 🤝 **Social Worker Matching** | Match residents with social workers via Hope Services integration | 🔮 Future |
+| 📞 **Hope Services Contacts** | Direct access to Hope Services contacts and resources in-app | 🔮 Future |
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Mobile Framework** | React Native (Expo) |
+| **Language** | TypeScript |
+| **Navigation** | Expo Router |
+| **Backend & Auth** | Firebase (Firestore + Firebase Auth) |
+| **UI / Styling** | React Native StyleSheet |
+| **Icons** | @expo/vector-icons (Ionicons) |
+
+---
+
+## 🗂️ Project Structure
+
+```
+VillageHub/
+├── app/
+│   ├── (admin)/          # Admin-only screens
+│   └── (user)/           # Resident screens
+├── assets/
+│   └── images/
+├── services/             # Firebase service layer
+├── state/                # Auth & global state
+└── firebase.ts           # Firebase config
+```
+
+---
+
+## 🗓️ Timeline
+
+```
+Week 1       → Onboarding & environment setup
+Weeks 2–3    → Training, design system & Firebase setup
+Weeks 3–8    → Core feature development
+Weeks 8–10   → Testing, bug fixes & polish
+Weeks 10–12  → Demo prep & client presentation
+```
+
+---
+
+## 🚀 Deployment
+
+VillageHub is being deployed as a **native iOS app** through the **Apple Developer Program**.
+
+| Step | Details |
+|---|---|
+| **Platform** | iOS (iPhone) |
+| **Distribution** | Apple App Store via Apple Developer Program |
+| **Build Tool** | Expo EAS Build |
+| **Review Process** | Apple App Store Review |
+
+> Android / Google Play deployment may follow in a future phase.
+
+---
+
+## 🤝 Partnerships & Future Integrations
+
+### Hope Services Collaboration
+
+VillageHub is planning a partnership with **[Hope Services](https://www.hopeservices.org/)** — a leading nonprofit supporting individuals with developmental disabilities — to bring wraparound support directly into the app.
+
+Planned integrations include:
+
+- 👩‍⚕️ **Social Worker Matching** — Residents can be matched with a dedicated social worker based on their needs and location
+- 📞 **Hope Services Contact Directory** — In-app access to Hope Services staff contacts, resources, and emergency support lines
+- 📋 **Case Coordination** — Streamlined communication between residents, social workers, and community admins
+
+> These features are planned for a future release and are subject to partnership agreement finalization.
+
+---
+
+## 👥 Team
+
+| Role | Headcount |
+|---|---|
+| Backend Developers | 8 |
+| Frontend Developers | 4 |
+| Project Managers | 2 |
+
+**Difficulty:** Beginner–Intermediate  
+**Topics:** Frontend · Backend · APIs · Database · UI/UX
+
+---
+
+## ⚠️ Risks & Mitigations
+
+| Risk | Mitigation |
+|---|---|
+| New technology learning curve | Dedicated training weeks + pair programming |
+| Team experience gaps | Regular check-ins, documentation, and shared code reviews |
+| Scope creep | Strict core vs. stretch feature separation |
+
+---
+
+## 🎯 Project Goals
+
+**In scope:**
+- ✅ Functional app deployed to the Apple App Store
+- ✅ Polished, usable UI/UX
+- ✅ Clear learning outcomes for all team members
+- ✅ Hope Services partnership groundwork
+
+**Out of scope:**
+- ❌ Production-perfect features (polish over completeness)
+- ❌ Full-scale deployment
+
+---
+
+<div align="center">
+  <br/>
+  <img src="images/TVS_logo.png" alt="Tiny Village Spirit" width="48" />
+  <br/>
+  <sub>Built with ❤️ for <strong>Tiny Village Spirit</strong> communities</sub>
+</div>
