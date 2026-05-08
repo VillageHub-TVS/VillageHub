@@ -203,7 +203,7 @@ export default function AdminDashboard() {
         </View>
 
         {/* Public Calendar */}
-        <SectionBox title="Public Calendar" empty={announcements.length === 0} onAdd={openModal}>
+        <SectionBox title="Announcements" empty={announcements.length === 0} onAdd={openModal}>
           {announcements.map((a) => (
             <ItemCard key={a.id}>
               <Text style={styles.cardTitle} numberOfLines={1}>{a.title}</Text>

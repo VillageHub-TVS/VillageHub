@@ -8,9 +8,14 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { listBooking, updateBooking } from '@/services/roomBookingService';
 import { subscribeToAuthState } from '@/services/authService';
 import { Timestamp } from 'firebase/firestore';
+
+const TEAL = '#1a7a6e';
+const DARK_TEAL = '#0f5a51';
+const GRAY_BOX = '#e8e8e8';
 
 type BookingRow = {
   id: string;
@@ -43,55 +48,34 @@ export default function ManageBookings() {
   const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<Tab>('pending');
   const [actingId, setActingId] = useState<string | null>(null);
-  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null); // null = unknown
+  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
 
-  // Track auth state — stop all fetches the moment user signs out
   useEffect(() => {
-    const unsubscribe = subscribeToAuthState((user) => {
-      setIsSignedIn(!!user);
-    });
+    const unsubscribe = subscribeToAuthState((user) => setIsSignedIn(!!user));
     return unsubscribe;
   }, []);
 
   const load = useCallback(async () => {
-    // Guard: don't fetch if we know there's no user
     if (isSignedIn === false) return;
     const data = (await listBooking()) as BookingRow[];
     setBookings(data);
   }, [isSignedIn]);
 
   useEffect(() => {
-    // Don't attempt load until auth state is known
     if (isSignedIn === null) return;
-    // If signed out, clear bookings and stop loading
-    if (isSignedIn === false) {
-      setBookings([]);
-      setLoading(false);
-      return;
-    }
-
+    if (isSignedIn === false) { setBookings([]); setLoading(false); return; }
     (async () => {
-      try {
-        setLoading(true);
-        await load();
-      } catch {
-        Alert.alert('Error', 'Could not load bookings.');
-      } finally {
-        setLoading(false);
-      }
+      try { setLoading(true); await load(); }
+      catch { Alert.alert('Error', 'Could not load bookings.'); }
+      finally { setLoading(false); }
     })();
   }, [load, isSignedIn]);
 
   const onRefresh = useCallback(async () => {
     if (!isSignedIn) return;
-    try {
-      setRefreshing(true);
-      await load();
-    } catch {
-      Alert.alert('Error', 'Could not refresh.');
-    } finally {
-      setRefreshing(false);
-    }
+    try { setRefreshing(true); await load(); }
+    catch { Alert.alert('Error', 'Could not refresh.'); }
+    finally { setRefreshing(false); }
   }, [load, isSignedIn]);
 
   const filtered = useMemo(() => {
@@ -107,7 +91,7 @@ export default function ManageBookings() {
       await updateBooking(id, { approved: true });
       await load();
     } catch {
-      Alert.alert('Error', 'Could not approve booking. Check Firestore rules allow admin updates.');
+      Alert.alert('Error', 'Could not approve booking.');
     } finally {
       setActingId(null);
     }
@@ -118,8 +102,7 @@ export default function ManageBookings() {
     Alert.alert('Mark pending?', 'This will set the booking back to pending.', [
       { text: 'Cancel', style: 'cancel' },
       {
-        text: 'Mark pending',
-        style: 'destructive',
+        text: 'Mark pending', style: 'destructive',
         onPress: async () => {
           try {
             setActingId(id);
@@ -138,7 +121,7 @@ export default function ManageBookings() {
   if (loading || isSignedIn === null) {
     return (
       <View style={[styles.screen, styles.centered]}>
-        <ActivityIndicator />
+        <ActivityIndicator color={TEAL} size="large" />
       </View>
     );
   }
@@ -148,15 +131,15 @@ export default function ManageBookings() {
   return (
     <View style={styles.screen}>
       <View style={styles.header}>
-        <Text style={styles.title}>Manage bookings</Text>
+        <Text style={styles.title}>Manage Bookings</Text>
         <Text style={styles.subtitle}>{pendingCount} pending approval</Text>
       </View>
 
       <View style={styles.tabs}>
-        {(['pending', 'approved', 'all'] as const).map((t) => (
+        {(['pending', 'approved', 'all'] as Tab[]).map((t) => (
           <Pressable key={t} style={[styles.tab, tab === t && styles.tabActive]} onPress={() => setTab(t)}>
             <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
-              {t === 'pending' ? 'Pending' : t === 'approved' ? 'Approved' : 'All'}
+              {t.charAt(0).toUpperCase() + t.slice(1)}
             </Text>
           </Pressable>
         ))}
@@ -174,27 +157,32 @@ export default function ManageBookings() {
           return (
             <View style={styles.card}>
               <View style={styles.rowTop}>
-                <Text style={styles.cardTitle} numberOfLines={2}>
-                  {item.title}
-                </Text>
+                <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
                 <Text style={[styles.badge, item.approved ? styles.badgeOk : styles.badgeWait]}>
                   {item.approved ? 'Approved' : 'Pending'}
                 </Text>
               </View>
               {!!item.description && (
-                <Text style={styles.desc} numberOfLines={3}>
-                  {item.description}
-                </Text>
+                <Text style={styles.desc} numberOfLines={3}>{item.description}</Text>
               )}
-              <Text style={styles.meta}>
-                {(item.site ?? '—') + ' • ' + (item.reservedSpot ?? '—')}
-              </Text>
-              <Text style={styles.meta}>
-                {toDate(item.checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                {' → '}
-                {toDate(item.checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              </Text>
-              {item.user ? <Text style={styles.uid}>Resident: {item.user.slice(0, 8)}…</Text> : null}
+              <View style={styles.metaRow}>
+                <Ionicons name="location-outline" size={11} color={TEAL} />
+                <Text style={styles.meta}>{item.site ?? '—'} · {item.reservedSpot ?? '—'}</Text>
+              </View>
+              <View style={styles.metaRow}>
+                <Ionicons name="time-outline" size={11} color={TEAL} />
+                <Text style={styles.meta}>
+                  {toDate(item.checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  {' → '}
+                  {toDate(item.checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </Text>
+              </View>
+              {item.user ? (
+                <View style={styles.metaRow}>
+                  <Ionicons name="person-outline" size={11} color={TEAL} />
+                  <Text style={styles.meta}>Resident: {item.user.slice(0, 8)}…</Text>
+                </View>
+              ) : null}
 
               {!item.approved ? (
                 <Pressable
@@ -208,7 +196,7 @@ export default function ManageBookings() {
                   style={[styles.pendingBtn, busy && styles.btnDisabled]}
                   onPress={() => unapprove(item.id)}
                   disabled={busy}>
-                  <Text style={styles.pendingBtnText}>Mark pending</Text>
+                  <Text style={styles.pendingBtnText}>Mark Pending</Text>
                 </Pressable>
               )}
             </View>
@@ -220,58 +208,49 @@ export default function ManageBookings() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F8F8F6' },
+  screen: { flex: 1, backgroundColor: '#ffffff' },
   centered: { justifyContent: 'center', alignItems: 'center' },
-  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  title: { fontSize: 22, fontWeight: '600', color: '#1A1A18' },
-  subtitle: { marginTop: 4, fontSize: 13, color: '#6A6964' },
+
+  header: { paddingHorizontal: 20, paddingTop: 56, paddingBottom: 12 },
+  title: { fontSize: 26, fontWeight: '900', color: DARK_TEAL },
+  subtitle: { marginTop: 4, fontSize: 13, color: TEAL, fontWeight: '500' },
+
   tabs: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    marginBottom: 10,
-    backgroundColor: '#EDEDEA',
-    borderRadius: 10,
-    padding: 3,
-    gap: 4,
+    flexDirection: 'row', marginHorizontal: 20, marginBottom: 14,
+    backgroundColor: GRAY_BOX, borderRadius: 999, padding: 4, gap: 4,
   },
-  tab: { flex: 1, paddingVertical: 8, borderRadius: 8, alignItems: 'center' },
-  tabActive: { backgroundColor: '#fff', borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.08)' },
-  tabText: { fontSize: 13, color: '#888780' },
-  tabTextActive: { color: '#1A1A18', fontWeight: '600' },
+  tab: { flex: 1, paddingVertical: 9, borderRadius: 999, alignItems: 'center' },
+  tabActive: { backgroundColor: TEAL },
+  tabText: { fontSize: 13, color: TEAL, fontWeight: '600' },
+  tabTextActive: { color: '#fff', fontWeight: '800' },
+
   list: { paddingHorizontal: 20, paddingBottom: 32, gap: 10 },
-  empty: { textAlign: 'center', color: '#8A8982', marginTop: 40 },
+  empty: { textAlign: 'center', color: TEAL, marginTop: 40, fontWeight: '600' },
+
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#ECEBE7',
-    padding: 14,
-    gap: 6,
+    backgroundColor: '#fff', borderRadius: 16,
+    borderWidth: 1, borderColor: GRAY_BOX, padding: 14, gap: 7,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
   },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 },
-  cardTitle: { flex: 1, fontSize: 15, fontWeight: '600', color: '#1A1A18' },
-  badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, fontSize: 11, fontWeight: '600', overflow: 'hidden' },
+  cardTitle: { flex: 1, fontSize: 15, fontWeight: '700', color: DARK_TEAL },
+  badge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 999, fontSize: 11, fontWeight: '700', overflow: 'hidden' },
   badgeWait: { backgroundColor: '#F9EFD9', color: '#825102' },
   badgeOk: { backgroundColor: '#E3F2DA', color: '#205A30' },
-  desc: { fontSize: 13, color: '#605F59' },
-  meta: { fontSize: 12, color: '#8A8982' },
-  uid: { fontSize: 11, color: '#B4B2A9' },
+  desc: { fontSize: 13, color: TEAL },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  meta: { fontSize: 12, color: '#999', fontWeight: '500' },
+
   approveBtn: {
-    marginTop: 8,
-    backgroundColor: '#1A1A18',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
+    marginTop: 6, backgroundColor: TEAL, borderRadius: 999,
+    paddingVertical: 11, alignItems: 'center',
+    shadowColor: TEAL, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.25, shadowRadius: 6, elevation: 3,
   },
-  approveBtnText: { color: '#fff', fontWeight: '600' },
+  approveBtnText: { color: '#fff', fontWeight: '800', fontSize: 14 },
   pendingBtn: {
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: '#D9D8D2',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
+    marginTop: 6, borderWidth: 1.5, borderColor: GRAY_BOX,
+    borderRadius: 999, paddingVertical: 11, alignItems: 'center',
   },
-  pendingBtnText: { color: '#5D5C57', fontWeight: '600' },
-  btnDisabled: { opacity: 0.6 },
+  pendingBtnText: { color: TEAL, fontWeight: '700', fontSize: 14 },
+  btnDisabled: { opacity: 0.5 },
 });
