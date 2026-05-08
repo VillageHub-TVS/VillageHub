@@ -21,6 +21,12 @@ import {
 } from '@/services/roomBookingService';
 import { listAllBookables, listTypesForBookable, type Bookable } from '@/services/bookableService';
 
+const TEAL = '#1a7a6e';
+const DARK_TEAL = '#0f5a51';
+const YELLOW = '#f9e84e';
+const BG = '#ffffff';
+const GRAY_BOX = '#e8e8e8';
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type Booking = {
@@ -80,7 +86,7 @@ function Dropdown({ placeholder, value, options, onSelect }: DropdownProps) {
         <Text style={value ? styles.dropdownValue : styles.dropdownPlaceholder}>
           {value || placeholder}
         </Text>
-        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={14} color="#888780" />
+        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={14} color={TEAL} />
       </Pressable>
       {open && (
         <View style={styles.dropdownList}>
@@ -113,23 +119,20 @@ export default function Bookings() {
   const [modalVisible, setModalVisible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Bookables from Firebase
   const [bookables, setBookables] = useState<Bookable[]>([]);
   const [bookablesLoading, setBookablesLoading] = useState(true);
   const [bookablesError, setBookablesError] = useState<string | null>(null);
 
-  // Types for the selected room
   const [types, setTypes] = useState<string[]>([]);
   const [typesLoading, setTypesLoading] = useState(false);
 
-  // Form state
-  const [fTitle, setFTitle]         = useState('');
-  const [fRoom, setFRoom]           = useState('');
-  const [fType, setFType]           = useState('');
-  const [fTimeSlot, setFTimeSlot]   = useState('');
-  const [fDesc, setFDesc]           = useState('');
-  const [fCheckIn, setFCheckIn]     = useState('');
-  const [fCheckOut, setFCheckOut]   = useState('');
+  const [fTitle, setFTitle]       = useState('');
+  const [fRoom, setFRoom]         = useState('');
+  const [fType, setFType]         = useState('');
+  const [fTimeSlot, setFTimeSlot] = useState('');
+  const [fDesc, setFDesc]         = useState('');
+  const [fCheckIn, setFCheckIn]   = useState('');
+  const [fCheckOut, setFCheckOut] = useState('');
 
   const roomOptions = [...new Set(bookables.map((b) => b.name))].sort();
 
@@ -197,14 +200,9 @@ export default function Bookings() {
       let isDuplicate = false;
       try {
         isDuplicate = await checkExactBookingConflict(fRoom, checkIn, checkOut, fTimeSlot);
-      } catch {
-        // If the conflict check fails (e.g. Firestore rules), proceed anyway
-      }
+      } catch { /* proceed if conflict check fails */ }
       if (isDuplicate) {
-        Alert.alert(
-          'Already booked',
-          `"${fRoom}" is already booked for those exact dates. Please choose different dates or a different room.`,
-        );
+        Alert.alert('Already booked', `"${fRoom}" is already booked for those exact dates.`);
         return;
       }
       const selectedBookable = bookables.find((b) => b.name === fRoom);
@@ -248,8 +246,6 @@ export default function Bookings() {
       },
     ]);
   };
-
-  // ── Modal helpers ──────────────────────────────────────────────────────────
 
   const handleRoomSelect = async (roomName: string) => {
     setFRoom(roomName);
@@ -295,19 +291,19 @@ export default function Bookings() {
         <View style={styles.cardMeta}>
           {!!b.reservedSpot && (
             <View style={styles.metaPill}>
-              <Ionicons name="home-outline" size={11} color="#5F5E5A" />
+              <Ionicons name="home-outline" size={11} color={TEAL} />
               <Text style={styles.metaPillText}>{b.reservedSpot}</Text>
             </View>
           )}
           {!!b.type && (
             <View style={styles.metaPill}>
-              <Ionicons name="pricetag-outline" size={11} color="#5F5E5A" />
+              <Ionicons name="pricetag-outline" size={11} color={TEAL} />
               <Text style={styles.metaPillText}>{b.type}</Text>
             </View>
           )}
           {!!b.timeSlot && (
             <View style={styles.metaPill}>
-              <Ionicons name="time-outline" size={11} color="#5F5E5A" />
+              <Ionicons name="time-outline" size={11} color={TEAL} />
               <Text style={styles.metaPillText}>{b.timeSlot}</Text>
             </View>
           )}
@@ -319,7 +315,7 @@ export default function Bookings() {
         style={styles.deleteBtn}
         onPress={() => handleDelete(b.id)}
         accessibilityLabel="Delete booking">
-        <Text style={styles.deleteBtnText}>✕</Text>
+        <Ionicons name="trash-outline" size={16} color="#b91c1c" />
       </TouchableOpacity>
     </View>
   );
@@ -369,7 +365,7 @@ export default function Bookings() {
 
       {/* List */}
       {loading ? (
-        <ActivityIndicator style={{ marginTop: 40 }} />
+        <ActivityIndicator style={{ marginTop: 40 }} color={TEAL} />
       ) : (
         <FlatList
           data={filtered}
@@ -384,13 +380,18 @@ export default function Bookings() {
       <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={closeModal}>
         <View style={styles.overlay}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>New booking</Text>
+            <Text style={styles.modalTitle}>New Booking</Text>
 
-            <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.modalScroll}>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={styles.modalScroll}>
+
               <Text style={styles.fieldLabel}>Title *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Booking title"
+                placeholderTextColor="#aaa"
                 value={fTitle}
                 onChangeText={setFTitle}
               />
@@ -401,7 +402,7 @@ export default function Bookings() {
 
               <Text style={styles.fieldLabel}>Room *</Text>
               {bookablesLoading ? (
-                <ActivityIndicator style={{ marginVertical: 10 }} />
+                <ActivityIndicator style={{ marginVertical: 10 }} color={TEAL} />
               ) : (
                 <Dropdown
                   placeholder="Select a room"
@@ -413,7 +414,7 @@ export default function Bookings() {
 
               <Text style={styles.fieldLabel}>Type *</Text>
               {typesLoading ? (
-                <ActivityIndicator style={{ marginVertical: 10 }} />
+                <ActivityIndicator style={{ marginVertical: 10 }} color={TEAL} />
               ) : (
                 <Dropdown
                   placeholder={fRoom ? 'Select a type' : 'Select a room first'}
@@ -435,6 +436,7 @@ export default function Bookings() {
               <TextInput
                 style={[styles.input, styles.inputMulti]}
                 placeholder="Optional notes"
+                placeholderTextColor="#aaa"
                 value={fDesc}
                 onChangeText={setFDesc}
                 multiline
@@ -444,6 +446,7 @@ export default function Bookings() {
               <TextInput
                 style={styles.input}
                 placeholder="2025-12-01"
+                placeholderTextColor="#aaa"
                 value={fCheckIn}
                 onChangeText={setFCheckIn}
               />
@@ -452,6 +455,7 @@ export default function Bookings() {
               <TextInput
                 style={styles.input}
                 placeholder="2025-12-05"
+                placeholderTextColor="#aaa"
                 value={fCheckOut}
                 onChangeText={setFCheckOut}
               />
@@ -460,8 +464,11 @@ export default function Bookings() {
                 <TouchableOpacity style={styles.cancelBtn} onPress={closeModal} disabled={submitting}>
                   <Text style={styles.cancelBtnText}>Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.saveBtn, submitting && styles.saveBtnDisabled]} onPress={handleAdd} disabled={submitting}>
-                  <Text style={styles.saveBtnText}>{submitting ? 'Checking…' : 'Save booking'}</Text>
+                <TouchableOpacity
+                  style={[styles.saveBtn, submitting && styles.saveBtnDisabled]}
+                  onPress={handleAdd}
+                  disabled={submitting}>
+                  <Text style={styles.saveBtnText}>{submitting ? 'Checking…' : 'Save Booking'}</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
@@ -475,65 +482,77 @@ export default function Bookings() {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  screen:       { flex: 1, backgroundColor: '#F8F8F6' },
-  header:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: 20, paddingBottom: 12 },
-  pageTitle:    { fontSize: 22, fontWeight: '600', color: '#1A1A18' },
-  pageSubtitle: { fontSize: 13, color: '#888780', marginTop: 2 },
-  addBtn:       { backgroundColor: '#1A1A18', paddingHorizontal: 16, paddingVertical: 9, borderRadius: 10 },
-  addBtnText:   { color: '#fff', fontSize: 13, fontWeight: '600' },
+  screen: { flex: 1, backgroundColor: BG },
 
-  stats:     { flexDirection: 'row', gap: 10, paddingHorizontal: 20, marginBottom: 14 },
-  statCard:  { flex: 1, backgroundColor: '#EDEDEA', borderRadius: 10, padding: 12 },
-  statLabel: { fontSize: 12, color: '#888780', marginBottom: 3 },
-  statValue: { fontSize: 22, fontWeight: '600', color: '#1A1A18' },
+  // header
+  header:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: 20, paddingTop: 56, paddingBottom: 12 },
+  pageTitle:    { fontSize: 26, fontWeight: '900', color: DARK_TEAL },
+  pageSubtitle: { fontSize: 13, color: TEAL, marginTop: 2, fontWeight: '500' },
+  addBtn:       { backgroundColor: TEAL, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 999,
+                  shadowColor: TEAL, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
+  addBtnText:   { color: '#fff', fontSize: 13, fontWeight: '800' },
 
-  tabs:          { flexDirection: 'row', marginHorizontal: 20, backgroundColor: '#EDEDEA', borderRadius: 10, padding: 3, marginBottom: 14 },
-  tab:           { flex: 1, paddingVertical: 7, borderRadius: 8, alignItems: 'center' },
-  tabActive:     { backgroundColor: '#fff', borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.1)' },
-  tabText:       { fontSize: 13, color: '#888780' },
-  tabTextActive: { color: '#1A1A18', fontWeight: '500' },
+  // stats
+  stats:     { flexDirection: 'row', gap: 10, paddingHorizontal: 20, marginBottom: 16 },
+  statCard:  { flex: 1, backgroundColor: GRAY_BOX, borderRadius: 16, padding: 14 },
+  statLabel: { fontSize: 11, color: TEAL, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
+  statValue: { fontSize: 24, fontWeight: '900', color: DARK_TEAL },
 
-  list:  { paddingHorizontal: 20, paddingBottom: 32, gap: 8 },
-  empty: { textAlign: 'center', color: '#888780', fontSize: 14, marginTop: 48 },
+  // tabs
+  tabs:          { flexDirection: 'row', marginHorizontal: 20, backgroundColor: GRAY_BOX, borderRadius: 999, padding: 4, marginBottom: 16 },
+  tab:           { flex: 1, paddingVertical: 8, borderRadius: 999, alignItems: 'center' },
+  tabActive:     { backgroundColor: TEAL },
+  tabText:       { fontSize: 13, color: TEAL, fontWeight: '600' },
+  tabTextActive: { color: '#fff', fontWeight: '800' },
 
-  card:       { backgroundColor: '#fff', borderRadius: 12, borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.08)', padding: 14, flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  cardBody:   { flex: 1, gap: 4 },
+  // list
+  list:  { paddingHorizontal: 20, paddingBottom: 32, gap: 10 },
+  empty: { textAlign: 'center', color: TEAL, fontSize: 14, marginTop: 48, fontWeight: '600' },
+
+  // card
+  card:       { backgroundColor: '#fff', borderRadius: 16, borderWidth: 1, borderColor: GRAY_BOX,
+                padding: 14, flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+                shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1 },
+  cardBody:   { flex: 1, gap: 5 },
   cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
-  cardTitle:  { flex: 1, fontSize: 14, fontWeight: '500', color: '#1A1A18' },
-  statusBadge:    { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 12, fontSize: 11, fontWeight: '600', overflow: 'hidden' },
+  cardTitle:  { flex: 1, fontSize: 14, fontWeight: '700', color: DARK_TEAL },
+  statusBadge:    { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 999, fontSize: 11, fontWeight: '700', overflow: 'hidden' },
   statusApproved: { backgroundColor: '#E3F2DA', color: '#205A30' },
   statusPending:  { backgroundColor: '#F9EFD9', color: '#825102' },
-  cardDesc:   { fontSize: 13, color: '#888780' },
+  cardDesc:   { fontSize: 13, color: '#555' },
   cardMeta:   { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  metaPill:   { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#EDEDEA', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 },
-  metaPillText: { fontSize: 12, color: '#5F5E5A' },
-  dueText:    { fontSize: 12, color: '#B4B2A9' },
-  deleteBtn:     { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  deleteBtnText: { fontSize: 13, color: '#B4B2A9' },
+  metaPill:   { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: GRAY_BOX, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4 },
+  metaPillText: { fontSize: 12, color: DARK_TEAL, fontWeight: '600' },
+  dueText:    { fontSize: 12, color: '#999', fontWeight: '500' },
+  deleteBtn:  { width: 32, height: 32, borderRadius: 999, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fef2f2' },
 
+  // modal
   overlay:    { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
-  modal:      { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24, maxHeight: '90%' },
-  modalTitle: { fontSize: 17, fontWeight: '600', color: '#1A1A18', marginBottom: 16 },
-  fieldLabel: { fontSize: 13, color: '#888780', marginBottom: 5, marginTop: 10 },
-  input:      { borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 10, padding: 10, fontSize: 14, color: '#1A1A18', backgroundColor: '#FAFAF8' },
+  modal:      { backgroundColor: '#fff', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, maxHeight: '92%' },
+  modalTitle: { fontSize: 20, fontWeight: '900', color: DARK_TEAL, marginBottom: 16 },
+  modalScroll: { paddingBottom: 8 },
+
+  fieldLabel: { fontSize: 12, color: TEAL, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, marginTop: 14 },
+  input:      { borderWidth: 1.5, borderColor: GRAY_BOX, borderRadius: 14, padding: 12, fontSize: 14, color: DARK_TEAL, backgroundColor: '#fafafa', fontWeight: '600' },
   inputMulti: { minHeight: 72, textAlignVertical: 'top' },
 
-  dropdownTrigger:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 10, padding: 10, backgroundColor: '#FAFAF8' },
-  dropdownValue:        { fontSize: 14, color: '#1A1A18' },
-  dropdownPlaceholder:  { fontSize: 14, color: '#B4B2A9' },
-  dropdownList:         { borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.1)', borderRadius: 10, backgroundColor: '#fff', marginTop: 4, overflow: 'hidden' },
-  dropdownOption:       { paddingHorizontal: 14, paddingVertical: 11, borderBottomWidth: 0.5, borderBottomColor: 'rgba(0,0,0,0.06)' },
-  dropdownOptionActive: { backgroundColor: '#EDEDEA' },
-  dropdownOptionText:   { fontSize: 14, color: '#1A1A18' },
-  dropdownOptionTextActive: { fontWeight: '600' },
-  dropdownEmpty:        { paddingHorizontal: 14, paddingVertical: 11, fontSize: 13, color: '#B4B2A9' },
+  dropdownTrigger:          { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+                              borderWidth: 1.5, borderColor: GRAY_BOX, borderRadius: 14, padding: 12, backgroundColor: '#fafafa' },
+  dropdownValue:            { fontSize: 14, color: DARK_TEAL, fontWeight: '600' },
+  dropdownPlaceholder:      { fontSize: 14, color: '#aaa' },
+  dropdownList:             { borderWidth: 1.5, borderColor: GRAY_BOX, borderRadius: 14, backgroundColor: '#fff', marginTop: 4, overflow: 'hidden' },
+  dropdownOption:           { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: GRAY_BOX },
+  dropdownOptionActive:     { backgroundColor: YELLOW },
+  dropdownOptionText:       { fontSize: 14, color: DARK_TEAL },
+  dropdownOptionTextActive: { fontWeight: '800', color: DARK_TEAL },
+  dropdownEmpty:            { paddingHorizontal: 14, paddingVertical: 12, fontSize: 13, color: '#aaa' },
 
   modalFooter:     { flexDirection: 'row', gap: 10, marginTop: 20 },
-  cancelBtn:       { flex: 1, padding: 13, borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 10, alignItems: 'center' },
-  cancelBtnText:   { fontSize: 14, color: '#5F5E5A' },
-  saveBtn:         { flex: 2, padding: 13, backgroundColor: '#1A1A18', borderRadius: 10, alignItems: 'center' },
-  saveBtnText:     { fontSize: 14, color: '#fff', fontWeight: '600' },
+  cancelBtn:       { flex: 1, padding: 14, borderWidth: 1.5, borderColor: GRAY_BOX, borderRadius: 999, alignItems: 'center' },
+  cancelBtnText:   { fontSize: 14, color: TEAL, fontWeight: '700' },
+  saveBtn:         { flex: 2, padding: 14, backgroundColor: TEAL, borderRadius: 999, alignItems: 'center',
+                     shadowColor: TEAL, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
+  saveBtnText:     { fontSize: 14, color: '#fff', fontWeight: '800' },
   saveBtnDisabled: { opacity: 0.6 },
-  bookablesError: { fontSize: 12, color: '#b91c1c', backgroundColor: '#fef2f2', borderRadius: 8, padding: 10, marginBottom: 4 },
-  modalScroll: { paddingBottom: 8 },
+  bookablesError:  { fontSize: 12, color: '#b91c1c', backgroundColor: '#fef2f2', borderRadius: 10, padding: 10, marginTop: 8 },
 });

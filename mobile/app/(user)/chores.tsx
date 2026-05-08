@@ -3,6 +3,10 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { markChoreCompleted } from '@/services/choreService';
 import { useAuth } from '@/state/auth';
 
+const TEAL = '#1a7a6e';
+const DARK_TEAL = '#0f5a51';
+const GRAY_BOX = '#e8e8e8';
+
 export default function Chores() {
   const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
@@ -35,8 +39,13 @@ export default function Chores() {
         <Text style={styles.cardBodyText}>
           This records completion for your account for the current week.
         </Text>
-        <Pressable style={styles.primaryButton} onPress={handleMarkComplete} disabled={submitting || !user}>
-          <Text style={styles.primaryButtonText}>{submitting ? 'Saving...' : 'Mark my week complete'}</Text>
+        <Pressable
+          style={[styles.primaryButton, (submitting || !user) && styles.primaryButtonDisabled]}
+          onPress={handleMarkComplete}
+          disabled={submitting || !user}>
+          <Text style={styles.primaryButtonText}>
+            {submitting ? 'Saving...' : 'Mark my week complete'}
+          </Text>
         </Pressable>
       </View>
     </View>
@@ -44,12 +53,29 @@ export default function Chores() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F8F8F6', padding: 20, gap: 14 },
-  title: { fontSize: 24, fontWeight: '600', color: '#1A1A18', marginTop: 4 },
-  subtitle: { color: '#6C6B66', marginBottom: 2, lineHeight: 20 },
-  card: { backgroundColor: '#FFFFFF', borderRadius: 12, borderWidth: 1, borderColor: '#ECEBE7', padding: 14, gap: 10 },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: '#1A1A18' },
-  cardBodyText: { color: '#6A6964' },
-  primaryButton: { backgroundColor: '#1A1A18', borderRadius: 10, alignItems: 'center', paddingVertical: 12 },
-  primaryButtonText: { color: '#FFFFFF', fontWeight: '600' },
+  screen: { flex: 1, backgroundColor: '#ffffff', padding: 20, paddingTop: 56, gap: 16 },
+  title: { fontSize: 26, fontWeight: '900', color: DARK_TEAL },
+  subtitle: { color: TEAL, lineHeight: 22, fontSize: 14, fontWeight: '500' },
+  card: {
+    backgroundColor: GRAY_BOX,
+    borderRadius: 20,
+    padding: 20,
+    gap: 12,
+  },
+  cardTitle: { fontSize: 17, fontWeight: '800', color: DARK_TEAL },
+  cardBodyText: { color: TEAL, fontSize: 14, lineHeight: 20 },
+  primaryButton: {
+    backgroundColor: TEAL,
+    borderRadius: 999,
+    alignItems: 'center',
+    paddingVertical: 14,
+    marginTop: 4,
+    shadowColor: TEAL,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  primaryButtonDisabled: { opacity: 0.5 },
+  primaryButtonText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 });

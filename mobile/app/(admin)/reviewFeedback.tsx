@@ -9,7 +9,12 @@ import {
   Text,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { listFeedback, updateFeedback } from '@/services/feedbackService';
+
+const TEAL = '#1a7a6e';
+const DARK_TEAL = '#0f5a51';
+const GRAY_BOX = '#e8e8e8';
 
 type FeedbackItem = {
   id: string;
@@ -23,6 +28,12 @@ type FeedbackItem = {
 };
 
 const STATUS_OPTIONS = ['Awaiting Review', 'In Progress', 'Resolved'] as const;
+
+const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
+  'Awaiting Review': { bg: '#F9EFD9', text: '#825102' },
+  'In Progress':     { bg: '#DBEAFE', text: '#1e40af' },
+  'Resolved':        { bg: '#E3F2DA', text: '#205A30' },
+};
 
 function formatCreatedAt(value: FeedbackItem['createdAt']) {
   if (!value) return '—';
@@ -50,26 +61,16 @@ export default function ReviewFeedback() {
 
   useEffect(() => {
     (async () => {
-      try {
-        setLoading(true);
-        await load();
-      } catch {
-        Alert.alert('Error', 'Could not load feedback.');
-      } finally {
-        setLoading(false);
-      }
+      try { setLoading(true); await load(); }
+      catch { Alert.alert('Error', 'Could not load feedback.'); }
+      finally { setLoading(false); }
     })();
   }, [load]);
 
   const onRefresh = useCallback(async () => {
-    try {
-      setRefreshing(true);
-      await load();
-    } catch {
-      Alert.alert('Error', 'Could not refresh.');
-    } finally {
-      setRefreshing(false);
-    }
+    try { setRefreshing(true); await load(); }
+    catch { Alert.alert('Error', 'Could not refresh.'); }
+    finally { setRefreshing(false); }
   }, [load]);
 
   const openEdit = (item: FeedbackItem) => {
@@ -77,16 +78,12 @@ export default function ReviewFeedback() {
     setDraftStatus(item.status ?? 'Awaiting Review');
   };
 
-  const closeEdit = () => {
-    setEditItem(null);
-  };
-
   const saveEdit = async () => {
     if (!editItem) return;
     try {
       setSaving(true);
       await updateFeedback(editItem.id, { status: draftStatus });
-      closeEdit();
+      setEditItem(null);
       await load();
     } catch {
       Alert.alert('Error', 'Could not update feedback.');
@@ -98,7 +95,7 @@ export default function ReviewFeedback() {
   if (loading) {
     return (
       <View style={[styles.screen, styles.centered]}>
-        <ActivityIndicator />
+        <ActivityIndicator color={TEAL} size="large" />
       </View>
     );
   }
@@ -106,8 +103,8 @@ export default function ReviewFeedback() {
   return (
     <View style={styles.screen}>
       <View style={styles.header}>
-        <Text style={styles.title}>All feedback</Text>
-        <Text style={styles.subtitle}>Tap a row to update status.</Text>
+        <Text style={styles.title}>All Feedback</Text>
+        <Text style={styles.subtitle}>Tap a card to update its status.</Text>
       </View>
 
       <FlatList
@@ -117,54 +114,68 @@ export default function ReviewFeedback() {
         refreshing={refreshing}
         onRefresh={onRefresh}
         ListEmptyComponent={<Text style={styles.empty}>No feedback yet.</Text>}
-        renderItem={({ item }) => (
-          <Pressable style={styles.card} onPress={() => openEdit(item)}>
-            <View style={styles.cardTop}>
-              <Text style={styles.cardTitle} numberOfLines={2}>
-                {item.title}
-              </Text>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{item.status ?? 'Pending'}</Text>
+        renderItem={({ item }) => {
+          const colors = STATUS_COLORS[item.status ?? 'Awaiting Review'] ?? STATUS_COLORS['Awaiting Review'];
+          return (
+            <Pressable style={styles.card} onPress={() => openEdit(item)}>
+              <View style={styles.cardTop}>
+                <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
+                <Text style={[styles.badge, { backgroundColor: colors.bg, color: colors.text }]}>
+                  {item.status ?? 'Awaiting Review'}
+                </Text>
               </View>
-            </View>
-            {!!item.description && (
-              <Text style={styles.desc} numberOfLines={2}>
-                {item.description}
-              </Text>
-            )}
-            <Text style={styles.meta}>
-              {item.site ?? '—'} • {item.category ?? 'general'} • User {shortUid(item.user)}
-            </Text>
-            <Text style={styles.date}>{formatCreatedAt(item.createdAt)}</Text>
-            <Text style={styles.tapHint}>Tap to update</Text>
-          </Pressable>
-        )}
+              {!!item.description && (
+                <Text style={styles.desc} numberOfLines={2}>{item.description}</Text>
+              )}
+              <View style={styles.metaRow}>
+                <Ionicons name="location-outline" size={11} color={TEAL} />
+                <Text style={styles.meta}>{item.site ?? '—'} · {item.category ?? 'general'}</Text>
+              </View>
+              <View style={styles.metaRow}>
+                <Ionicons name="person-outline" size={11} color={TEAL} />
+                <Text style={styles.meta}>User {shortUid(item.user)} · {formatCreatedAt(item.createdAt)}</Text>
+              </View>
+              <View style={styles.tapHintRow}>
+                <Ionicons name="create-outline" size={12} color={TEAL} />
+                <Text style={styles.tapHint}>Tap to update status</Text>
+              </View>
+            </Pressable>
+          );
+        }}
       />
 
-      <Modal visible={!!editItem} animationType="slide" transparent onRequestClose={closeEdit}>
+      {/* Edit Modal */}
+      <Modal visible={!!editItem} animationType="slide" transparent onRequestClose={() => setEditItem(null)}>
         <View style={styles.overlay}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Update feedback</Text>
+            <Text style={styles.modalTitle}>Update Feedback</Text>
             {editItem && (
-              <Text style={styles.modalSubtitle} numberOfLines={2}>
-                {editItem.title}
-              </Text>
+              <Text style={styles.modalSubtitle} numberOfLines={2}>{editItem.title}</Text>
             )}
 
             <Text style={styles.label}>Status</Text>
             <View style={styles.chipWrap}>
-              {STATUS_OPTIONS.map((s) => (
-                <Pressable
-                  key={s}
-                  onPress={() => setDraftStatus(s)}
-                  style={[styles.chip, draftStatus === s && styles.chipActive]}>
-                  <Text style={[styles.chipText, draftStatus === s && styles.chipTextActive]}>{s}</Text>
-                </Pressable>
-              ))}
+              {STATUS_OPTIONS.map((s) => {
+                const active = draftStatus === s;
+                const colors = STATUS_COLORS[s];
+                return (
+                  <Pressable
+                    key={s}
+                    onPress={() => setDraftStatus(s)}
+                    style={[
+                      styles.chip,
+                      active && { backgroundColor: colors.bg, borderColor: colors.text },
+                    ]}>
+                    <Text style={[styles.chipText, active && { color: colors.text, fontWeight: '800' }]}>
+                      {s}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
 
             <View style={styles.modalFooter}>
-              <Pressable style={styles.cancelBtn} onPress={closeEdit} disabled={saving}>
+              <Pressable style={styles.cancelBtn} onPress={() => setEditItem(null)} disabled={saving}>
                 <Text style={styles.cancelBtnText}>Cancel</Text>
               </Pressable>
               <Pressable style={styles.saveBtn} onPress={saveEdit} disabled={saving}>
@@ -179,78 +190,55 @@ export default function ReviewFeedback() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F8F8F6' },
+  screen: { flex: 1, backgroundColor: '#ffffff' },
   centered: { justifyContent: 'center', alignItems: 'center' },
-  header: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
-  title: { fontSize: 22, fontWeight: '600', color: '#1A1A18' },
-  subtitle: { marginTop: 4, fontSize: 13, color: '#6A6964' },
+
+  header: { paddingHorizontal: 20, paddingTop: 56, paddingBottom: 12 },
+  title: { fontSize: 26, fontWeight: '900', color: DARK_TEAL },
+  subtitle: { marginTop: 4, fontSize: 13, color: TEAL, fontWeight: '500' },
+
   list: { paddingHorizontal: 20, paddingBottom: 32, gap: 10 },
-  empty: { textAlign: 'center', color: '#8A8982', marginTop: 48 },
+  empty: { textAlign: 'center', color: TEAL, marginTop: 48, fontWeight: '600' },
+
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#ECEBE7',
-    padding: 14,
-    gap: 6,
+    backgroundColor: '#fff', borderRadius: 16,
+    borderWidth: 1, borderColor: GRAY_BOX, padding: 14, gap: 7,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 1,
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 },
-  cardTitle: { flex: 1, fontSize: 15, fontWeight: '600', color: '#1A1A18' },
-  badge: {
-    backgroundColor: '#F9EFD9',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  badgeDone: { backgroundColor: '#E3F2DA' },
-  badgeText: { fontSize: 11, fontWeight: '600', color: '#1A1A18' },
-  desc: { fontSize: 13, color: '#605F59' },
-  meta: { fontSize: 12, color: '#8A8982' },
-  date: { fontSize: 12, color: '#B4B2A9' },
-  tapHint: { fontSize: 11, color: '#2595eb', fontWeight: '600', marginTop: 2 },
+  cardTitle: { flex: 1, fontSize: 15, fontWeight: '700', color: DARK_TEAL },
+  badge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 999, fontSize: 11, fontWeight: '700', overflow: 'hidden' },
+  desc: { fontSize: 13, color: TEAL },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  meta: { fontSize: 12, color: '#999', fontWeight: '500' },
+  tapHintRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  tapHint: { fontSize: 11, color: TEAL, fontWeight: '700' },
+
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'flex-end' },
   modal: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 22,
-    paddingBottom: 28,
+    backgroundColor: '#fff', borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    padding: 24, paddingBottom: 32, gap: 6,
   },
-  modalTitle: { fontSize: 17, fontWeight: '600', color: '#1A1A18' },
-  modalSubtitle: { fontSize: 14, color: '#6A6964', marginTop: 6, marginBottom: 8 },
-  label: { fontSize: 12, fontWeight: '600', color: '#6A6964', marginTop: 12, marginBottom: 6 },
-  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  modalTitle: { fontSize: 20, fontWeight: '900', color: DARK_TEAL },
+  modalSubtitle: { fontSize: 14, color: TEAL, marginTop: 2 },
+  label: { fontSize: 11, fontWeight: '700', color: TEAL, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 12 },
+  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6 },
   chip: {
-    borderWidth: 1,
-    borderColor: '#D5D4CF',
-    borderRadius: 18,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderWidth: 1.5, borderColor: GRAY_BOX, borderRadius: 999,
+    paddingHorizontal: 14, paddingVertical: 8,
   },
-  chipActive: { borderColor: '#1A1A18', backgroundColor: '#EDEDEA' },
-  chipText: { fontSize: 12, color: '#7B7A73' },
-  chipTextActive: { color: '#1A1A18', fontWeight: '600' },
-  row: { flexDirection: 'row', gap: 10 },
-  toggle: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#D5D4CF',
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  toggleOn: { borderColor: '#1A1A18', backgroundColor: '#EDEDEA' },
-  toggleText: { fontWeight: '600', color: '#1A1A18' },
-  modalFooter: { flexDirection: 'row', gap: 10, marginTop: 22 },
+  chipText: { fontSize: 13, color: TEAL, fontWeight: '600' },
+
+  modalFooter: { flexDirection: 'row', gap: 10, marginTop: 16 },
   cancelBtn: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#DAD9D4',
-    borderRadius: 10,
-    alignItems: 'center',
-    paddingVertical: 12,
+    flex: 1, borderWidth: 1.5, borderColor: GRAY_BOX,
+    borderRadius: 999, alignItems: 'center', paddingVertical: 13,
   },
-  cancelBtnText: { color: '#595852' },
-  saveBtn: { flex: 2, backgroundColor: '#1A1A18', borderRadius: 10, alignItems: 'center', paddingVertical: 12 },
-  saveBtnText: { color: '#fff', fontWeight: '600' },
+  cancelBtnText: { color: TEAL, fontWeight: '700' },
+  saveBtn: {
+    flex: 2, backgroundColor: TEAL, borderRadius: 999,
+    alignItems: 'center', paddingVertical: 13,
+    shadowColor: TEAL, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4,
+  },
+  saveBtnText: { color: '#fff', fontWeight: '800' },
 });
