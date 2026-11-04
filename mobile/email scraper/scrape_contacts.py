@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+""":)
 scrape_contacts.py - find emails likely to answer simple info requests
 (e.g. "what are your business hours?") from a table of websites.
 
