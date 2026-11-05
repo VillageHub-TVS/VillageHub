@@ -8,3 +8,4 @@ npm init -y
 npm install express cors dotenv firebase-admin nodemailer node-cron
 
 ### Work here only if you need node.js!
+##
