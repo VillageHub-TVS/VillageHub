@@ -37,6 +37,7 @@ export default function UserLayout() {
       <Tabs.Screen name="chores" options={{ title: 'Chores', tabBarIcon: ({ color }) => <Ionicons name="checkmark-circle" size={28} color={color} /> }} />
       <Tabs.Screen name="feedback" options={{ title: 'Feedback', tabBarIcon: ({ color }) => <Ionicons name="mail" size={28} color={color} /> }} />
       <Tabs.Screen name="calendars" options={{ title: 'Calendar', tabBarIcon: ({ color }) => <Ionicons name="calendar-outline" size={28} color={color} /> }} />
+      <Tabs.Screen name="assistant" options={{ title: 'Ask', tabBarIcon: ({ color }) => <Ionicons name="chatbubble-ellipses" size={28} color={color} /> }} />
     </Tabs>
   );
 }

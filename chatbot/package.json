@@ -1,0 +1,20 @@
+{
+  "name": "villagehub-chatbot",
+  "version": "0.1.0",
+  "description": "User-facing AI chatbot that answers questions from VillageHub's Supabase resource tables (mobile clinics, food pantries, shelters).",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "cli": "node scripts/cli.js",
+    "check": "node scripts/check.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "openai": "^5.0.0"
+  }
+}
