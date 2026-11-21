@@ -8,22 +8,32 @@ const port = Number(process.env.PORT) || 3000;
 const routes = {
   '/overview': { page: 'overview', title: 'Overview' },
   '/calendar': { page: 'calendar', title: 'Calendar' },
+  '/edit-date': { page: 'edit-date', title: 'Edit hours and location' },
+  '/weekly-operation-hours': { page: 'weekly-operation-hours', title: 'Weekly operating hours' },
   '/inbox': { page: 'inbox', title: 'Inbox' },
   '/organization-detail': { page: 'organization-detail', title: 'Organization' },
+  '/edit-organizations': { page: 'edit-organizations', title: 'Edit organization detail' },
+  '/create-account': { page: 'create-account', title: 'Create account' },
+  '/set-operating-hours': { page: 'set-operating-hours', title: 'Set operating hours' },
   '/login': { page: 'login', title: 'Log in' },
 };
 const scripts = new Set([
   'sidebar.js',
   'overview.js',
   'calendar.js',
+  'edit-date.js',
+  'weekly-operation-hours.js',
   'inbox.js',
   'organization-detail.js',
+  'edit-organizations.js',
   'login.js',
+  'create-account.js',
+  'set-operating-hours.js',
 ]);
 
 function sendPage(res, route) {
-  const isLogin = route.page === 'login';
-  const sidebar = isLogin ? '' : '<aside class="sidebar" id="sidebar"></aside>';
+  const isStandalone = ['login', 'create-account', 'set-operating-hours'].includes(route.page);
+  const sidebar = isStandalone ? '' : '<aside class="sidebar" id="sidebar"></aside>';
   const html = `<!doctype html>
 <html lang="en">
   <head>

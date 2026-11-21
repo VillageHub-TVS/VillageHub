@@ -50,6 +50,12 @@ const styles = `
   .login-page { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: #f7f9f6; }
   .login-card { width: min(100%, 380px); padding: 30px; border: 1px solid #e5eae4; border-radius: 12px; background: #fff; }
   .login-card h1 { margin: 20px 0 0; color: #20362e; font-size: 24px; }
+  .login-card-actions { display: grid; gap: 10px; margin-top: 20px; }
+  .login-card-actions a {
+    display: block; padding: 9px 12px; border: 1px solid #d5e0d8;
+    border-radius: 6px; color: #126d5e; text-align: center; text-decoration: none;
+  }
+  .login-card-actions a:hover { background: #e5eee7; }
   @media (max-width: 600px) {
     .sidebar { width: 210px; padding-right: 12px; padding-left: 12px; }
     .page-content { margin-left: 210px; padding: 24px 18px; }
@@ -70,6 +76,12 @@ const links = [
   { page: 'organization-detail', label: 'Organization', href: '/organization-detail' },
 ];
 
+const pageTitles = {
+  'edit-date': 'Edit hours and location',
+  'weekly-operation-hours': 'Weekly operating hours',
+  'edit-organizations': 'Edit organization detail',
+};
+
 function addStyles() {
   const style = document.createElement('style');
   style.textContent = styles;
@@ -83,9 +95,14 @@ export function mountSidebar() {
   if (!sidebar || !content) return;
 
   const currentPage = document.body.dataset.page;
+  const activePage = {
+    'edit-date': 'calendar',
+    'weekly-operation-hours': 'calendar',
+    'edit-organizations': 'organization-detail',
+  }[currentPage] ?? currentPage;
   const navigation = links
     .map(({ page, label, href }) => {
-      const active = page === currentPage;
+      const active = page === activePage;
       const icon = page === 'organization-detail' ? icons.organization : icons[page];
       return `<a class="nav-link${active ? ' active' : ''}" href="${href}"${active ? ' aria-current="page"' : ''}>
         ${icon}<span>${label}</span>
@@ -108,21 +125,54 @@ export function mountSidebar() {
       <a class="logout-link" href="/login">Log out</a>
     </footer>
   `;
-  content.innerHTML = `<h1>${links.find((link) => link.page === currentPage)?.label ?? 'Overview'}</h1>`;
+  const title = pageTitles[currentPage] ?? links.find((link) => link.page === currentPage)?.label ?? 'Overview';
+  content.innerHTML = `<h1>${title}</h1>`;
 }
 
-export function mountLogin() {
+function mountFlowPage(title, actions = []) {
   addStyles();
   const content = document.querySelector('#page-content');
   if (!content) return;
 
   content.className = 'login-page';
-  content.innerHTML = `
-    <section class="login-card">
-      <a class="brand" href="/overview">
-        <span class="brand-mark" aria-hidden="true">P</span><span>Partner portal</span>
-      </a>
-      <h1>Log in</h1>
-    </section>
-  `;
+  const card = document.createElement('section');
+  card.className = 'login-card';
+
+  const brand = document.createElement('a');
+  brand.className = 'brand';
+  brand.href = '/overview';
+  brand.innerHTML = '<span class="brand-mark" aria-hidden="true">P</span><span>Partner portal</span>';
+
+  const heading = document.createElement('h1');
+  heading.textContent = title;
+  card.append(brand, heading);
+
+  if (actions.length) {
+    const actionList = document.createElement('div');
+    actionList.className = 'login-card-actions';
+    for (const { label, href } of actions) {
+      const link = document.createElement('a');
+      link.href = href;
+      link.textContent = label;
+      actionList.append(link);
+    }
+    card.append(actionList);
+  }
+
+  content.replaceChildren(card);
+}
+
+export function mountLogin() {
+  mountFlowPage('Log in', [{ label: 'Sign up', href: '/create-account' }]);
+}
+
+export function mountCreateAccount() {
+  mountFlowPage('Create account', [
+    { label: 'Log in', href: '/login' },
+    { label: 'Continue to set regular operating hours', href: '/set-operating-hours' },
+  ]);
+}
+
+export function mountOperatingHours() {
+  mountFlowPage('Set operating hours');
 }
