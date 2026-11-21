@@ -73,6 +73,20 @@ http.createServer((req, res) => {
     return;
   }
 
+  if (pathname === '/images/TVS_logo.png') {
+    fs.readFile(path.join(directory, '..', 'images', 'TVS_logo.png'), (error, image) => {
+      if (error) {
+        res.writeHead(500);
+        res.end('Unable to load logo');
+        return;
+      }
+
+      res.writeHead(200, { 'Content-Type': 'image/png' });
+      res.end(image);
+    });
+    return;
+  }
+
   const filename = path.basename(pathname);
   if (!scripts.has(filename) || pathname !== `/${filename}`) {
     res.writeHead(404);

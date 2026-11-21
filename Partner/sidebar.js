@@ -27,6 +27,7 @@ const styles = `
     display: flex; flex-direction: column; gap: 5px; margin-top: 20px;
     padding: 11px 9px; border-radius: 9px; background: #f5f7f1;
   }
+  .sidebar-logo { width: 28px; height: 28px; flex: none; object-fit: contain; }
   .organization-card strong { max-width: 185px; color: #263d36; font-size: 11px; line-height: 1.35; }
   .organization-card span { color: #7a8982; font-size: 10px; }
   .navigation { display: grid; gap: 3px; margin-top: 19px; }
@@ -112,15 +113,14 @@ export function mountSidebar() {
 
   sidebar.innerHTML = `
     <a class="brand" href="/overview">
-      <span class="brand-mark" aria-hidden="true">P</span><span>Partner portal</span>
+      <img class="sidebar-logo" src="/images/TVS_logo.png" alt=""><span>Partner portal</span>
     </a>
     <section class="organization-card" aria-label="Current organization">
-      <strong>Community Support Network</strong><span>Community organization</span>
+      <strong>Tiny Village Spirit Network</strong><span>Community organization</span>
     </section>
     <nav class="navigation" aria-label="Main navigation">${navigation}</nav>
     <footer class="sidebar-footer">
-      <span>Pacific Time · Los Angeles</span>
-      <strong>Community Support Network</strong>
+      <strong>Tiny Village Spirit Network</strong>
       <span>partner@example.com</span>
       <a class="logout-link" href="/login">Log out</a>
     </footer>
